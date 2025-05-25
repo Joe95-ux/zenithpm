@@ -1,0 +1,176 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  String                 @id @default(cuid()) @map("_id")
+  name                String
+  email               String                 @unique
+  password            String
+  avatarUrl           String?
+
+  organizationsOwned  Organization[]         @relation("UserOwnedOrganizations")
+  memberships         OrganizationMember[]
+  collaborators       Collaborator[]
+  feedbackSent        Feedback[]             @relation("FeedbackFrom")
+  feedbackReceived    Feedback[]             @relation("FeedbackTo")
+  cardAssignments     CardAssignment[]       @relation("UserCardAssignments")
+  createdAt           DateTime               @default(now())
+}
+
+model Organization {
+  id          String              @id @default(cuid()) @map("_id")
+  name        String
+  ownerId     String
+  owner       User                @relation("UserOwnedOrganizations", fields: [ownerId], references: [id])
+  
+  members     OrganizationMember[]
+  projects    Project[]
+  createdAt   DateTime            @default(now())
+}
+
+model OrganizationMember {
+  id              String        @id @default(cuid()) @map("_id")
+  userId          String
+  organizationId  String
+  user            User          @relation(fields: [userId], references: [id])
+  organization    Organization  @relation(fields: [organizationId], references: [id])
+  role            Role          @default(MEMBER)
+  status          InviteStatus  @default(ACCEPTED)
+
+  @@unique([userId, organizationId])
+}
+
+model Project {
+  id              String         @id @default(cuid()) @map("_id")
+  name            String
+  description     String?
+  organizationId  String
+  organization    Organization   @relation(fields: [organizationId], references: [id])
+  workspaces      Workspace[]
+  createdAt       DateTime       @default(now())
+}
+
+model Workspace {
+  id            String         @id @default(cuid()) @map("_id")
+  name          String
+  description   String?
+  projectId     String
+  project       Project        @relation(fields: [projectId], references: [id])
+  boards        Board[]
+  collaborators Collaborator[]
+  feedback      Feedback[]
+  invoices      Invoice[]
+  createdAt     DateTime       @default(now())
+}
+
+model Collaborator {
+  id          String       @id @default(cuid()) @map("_id")
+  userId      String
+  workspaceId String
+  user        User         @relation(fields: [userId], references: [id])
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id])
+  role        Role
+  invitedBy   String?
+  status      InviteStatus @default(PENDING)
+
+  @@unique([userId, workspaceId])
+}
+
+model Board {
+  id          String    @id @default(cuid()) @map("_id")
+  name        String
+  position    Int
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  lists       List[]
+}
+
+model List {
+  id       String  @id @default(cuid()) @map("_id")
+  name     String
+  position Int
+  boardId  String
+  board    Board   @relation(fields: [boardId], references: [id])
+  cards    Card[]
+}
+
+model Card {
+  id          String           @id @default(cuid()) @map("_id")
+  title       String
+  description String?
+  position    Int
+  listId      String
+  list        List             @relation(fields: [listId], references: [id])
+  assignees   CardAssignment[]
+  dueDate     DateTime?
+  labels      String[]
+  createdAt   DateTime         @default(now())
+}
+
+model CardAssignment {
+  id      String   @id @default(cuid()) @map("_id")
+  cardId  String
+  userId  String
+  card    Card     @relation(fields: [cardId], references: [id])
+  user    User     @relation("UserCardAssignments", fields: [userId], references: [id])
+
+  @@unique([cardId, userId])
+}
+
+model Feedback {
+  id           String      @id @default(cuid()) @map("_id")
+  fromUserId   String
+  toUserId     String
+  workspaceId  String
+  content      String
+  createdAt    DateTime    @default(now())
+
+  from         User        @relation("FeedbackFrom", fields: [fromUserId], references: [id])
+  to           User        @relation("FeedbackTo", fields: [toUserId], references: [id])
+  workspace    Workspace   @relation(fields: [workspaceId], references: [id])
+}
+
+model Invoice {
+  id          String        @id @default(cuid()) @map("_id")
+  workspaceId String
+  clientEmail String
+  items       Json
+  status      InvoiceStatus @default(DRAFT)
+  dueDate     DateTime
+  total       Float
+  sentAt      DateTime?
+  createdAt   DateTime      @default(now())
+
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id])
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+  GUEST
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+}
