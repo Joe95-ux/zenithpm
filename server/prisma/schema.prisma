@@ -15,19 +15,20 @@ datasource db {
 }
 
 model User {
-  id                  String                 @id @default(cuid()) @map("_id")
-  name                String
-  email               String                 @unique
-  password            String
-  avatarUrl           String?
+  id          String                 @id @default(cuid()) @map("_id")
+  name        String
+  email       String                 @unique
+  password    String
+  avatarUrl   String?
 
-  organizationsOwned  Organization[]         @relation("UserOwnedOrganizations")
-  memberships         OrganizationMember[]
-  collaborators       Collaborator[]
-  feedbackSent        Feedback[]             @relation("FeedbackFrom")
-  feedbackReceived    Feedback[]             @relation("FeedbackTo")
-  cardAssignments     CardAssignment[]       @relation("UserCardAssignments")
-  createdAt           DateTime               @default(now())
+  organizationsOwned Organization[] @relation("UserOwnedOrganizations")
+  memberships        OrganizationMember[]
+  collaborators      Collaborator[]
+  feedbackSent       Feedback[]             @relation("FeedbackFrom")
+  feedbackReceived   Feedback[]             @relation("FeedbackTo")
+  cardAssignments    CardAssignment[]       @relation("UserCardAssignments")
+  activityLogs       ActivityLog[]          @relation("UserActivityLogs")
+  createdAt          DateTime               @default(now())
 }
 
 model Organization {
@@ -38,6 +39,8 @@ model Organization {
   
   members     OrganizationMember[]
   projects    Project[]
+  payments  Payment[]           @relation("OrganizationPayments")
+  activityLogs ActivityLog[] @relation("OrganizationActivityLogs")
   createdAt   DateTime            @default(now())
 }
 
@@ -73,6 +76,7 @@ model Workspace {
   collaborators Collaborator[]
   feedback      Feedback[]
   invoices      Invoice[]
+  activityLogs ActivityLog[] @relation("WorkspaceActivityLogs")
   createdAt     DateTime       @default(now())
 }
 
@@ -156,6 +160,57 @@ model Invoice {
 
   workspace   Workspace     @relation(fields: [workspaceId], references: [id])
 }
+
+model ActivityLog {
+  id             String      @id @default(cuid()) @map("_id")
+  userId         String
+  organizationId String?
+  workspaceId    String?
+  action         String
+  targetType     String
+  targetId       String
+  metadata       Json?
+  createdAt      DateTime    @default(now())
+
+  user           User        @relation("UserActivityLogs", fields: [userId], references: [id])
+  organization   Organization? @relation("OrganizationActivityLogs", fields: [organizationId], references: [id])
+  workspace Workspace? @relation("WorkspaceActivityLogs", fields: [workspaceId], references: [id])
+  
+}
+
+model SubscriptionPlan {
+  id          String   @id @default(cuid()) @map("_id")
+  name        String   // e.g. "Single", "Team"
+  priceCents  Int      // 700 = $7.00
+  perSeat     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  payments    Payment[]
+}
+
+model Payment {
+  id               String   @id @default(cuid()) @map("_id")
+  organizationId   String
+  planId           String
+  stripeSessionId  String
+  stripeCustomerId String
+  amountCents      Int
+  seats            Int
+  status           PaymentStatus  @default(PENDING)
+  paidAt           DateTime?
+  createdAt        DateTime       @default(now())
+
+  organization     Organization   @relation("OrganizationPayments", fields: [organizationId], references: [id])
+  plan             SubscriptionPlan @relation(fields: [planId], references: [id])
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+}
+
 
 enum Role {
   OWNER
