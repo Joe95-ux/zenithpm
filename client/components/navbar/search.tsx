@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { Dialog, DialogTrigger, DialogContent } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Command, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { SearchIcon } from 'lucide-react';
