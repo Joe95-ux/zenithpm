@@ -1,8 +1,6 @@
-import {requiresAuth} from ('express-openid-connect');
+import {auth} from "express-oauth2-jwt-bearer";
 
-
-// sample use case: should be used in api routes
-
-// app.get('/profile', requiresAuth(), (req, res) => {
-//   res.send(JSON.stringify(req.oidc.user));
-// });
+export const checkJwt = auth({
+  audience: process.env.API_IDENTIFIER,
+  issuerBaseURL: process.env.ISSUER_BASE_URL,
+});

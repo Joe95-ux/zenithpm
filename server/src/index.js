@@ -2,7 +2,7 @@ dotenv.config();
 import express from "express";
 import cors from "cors";
 import { config } from "./config/auth0.js";
-import {auth} from "express-openid-connect";
+import {checkJwt} from "./middleware/authMiddleware.js";
 import path from "path";
 
 const app = express();
@@ -14,12 +14,13 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
 
-// auth router attaches /login, /logout, and /callback routes to the baseURL
-app.use(auth(config));
 
-// req.isAuthenticated is provided from the auth router
-app.get('/', (req, res) => {
-  res.send(req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out');
+// protected api routes ex
+
+app.get('/api/private', checkJwt, function(req, res) {
+  res.json({
+    message: 'Hello from a private endpoint! You need to be authenticated to see this.'
+  });
 });
 
 const port = process.env.PORT;
