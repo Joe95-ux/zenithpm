@@ -2,7 +2,7 @@ dotenv.config();
 import express from "express";
 import cors from "cors";
 import { config } from "./config/auth0.js";
-import {checkJwt} from "./middleware/authMiddleware.js";
+import {checkJwt, checkScopes} from "./middleware/authMiddleware.js";
 import path from "path";
 
 const app = express();
@@ -17,7 +17,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // protected api routes ex
 
-app.get('/api/private', checkJwt, function(req, res) {
+app.get('/api/private', checkJwt, checkScopes, function(req, res) {
   res.json({
     message: 'Hello from a private endpoint! You need to be authenticated to see this.'
   });
