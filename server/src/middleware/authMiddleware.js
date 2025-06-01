@@ -6,4 +6,5 @@ export const checkScopes = requiredScopes('read:messages');
 export const checkJwt = auth({
   audience: process.env.API_IDENTIFIER,
   issuerBaseURL: process.env.ISSUER_BASE_URL,
+  tokenSigningAlg:process.env.TOKENSIGNINGALG
 });
