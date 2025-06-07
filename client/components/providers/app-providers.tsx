@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { ThemeProvider } from "next-themes";
+import {UserProvider} from "@auth0/nextjs-auth0/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {ReactQueryDevtools} from "@tanstack/react-query-devtools";
 import NexTopLoader from "nextjs-toploader";
@@ -15,7 +16,10 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
         enableSystem
         disableTransitionOnChange
       >
-        {children}
+        <UserProvider>
+          {children}
+        </UserProvider>
+        
       </ThemeProvider>
       <ReactQueryDevtools/>
     </QueryClientProvider>
