@@ -1,4 +1,4 @@
-import type { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { auth0 } from "@/lib/auth0";
 
 export async function middleware(request: NextRequest) {
@@ -19,7 +19,7 @@ export async function middleware(request: NextRequest) {
 
     // user does not have a session — redirect to login
     if (!session) {
-        return NextResponse.redirect(`${origin}/auth/login`)
+        return NextResponse.redirect(`${origin}/api/auth/login`)
     }
 
     return authRes
