@@ -1,7 +1,6 @@
 import { Nunito } from 'next/font/google'
 import type { Metadata } from "next";
 import { AppProviders } from "@/components/providers/app-providers";
-import { Auth0Provider } from '@auth0/nextjs-auth0';
 import {Toaster} from "sonner";
 import "./globals.css";
 
@@ -25,11 +24,9 @@ export default function RootLayout({
         className={font.className}
       >
         <Toaster richColors closeButton position="top-right" />
-        <Auth0Provider>
         <AppProviders>
             {children}
           </AppProviders>
-        </Auth0Provider>
       </body>
     </html>
   );

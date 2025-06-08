@@ -1,14 +1,24 @@
-import {useUser} from "@auth0/nextjs-auth0/";
-import Link from "next/link"
+"use client"
+
+import { useUser } from "@auth0/nextjs-auth0"
 
 export default function Home() {
-  const {user, error, isLoading} = useUser();
+  const { user, isLoading } = useUser()
 
-  if(isLoading) return <div>Loading...</div>
-  if(error) return <div><p>Error finding user...</p></div>
+  if (isLoading) return <div>Loading...</div>
+  if (!user) return <div>
+   <p>Not authenticated!</p> 
+   <a href="/auth/login?screen_hint=signup">Sign up</a>
+   <a href="/auth/login">Log in</a> 
 
-  if(!error && user) return (
-    <div>{user.name}</div>
+  </div>
+
+  return (
+    <main>
+      <h1>Profile</h1>
+      <div>
+        <pre>{JSON.stringify(user, null, 2)}</pre>
+      </div>
+    </main>
   )
-  return <Link href="/auth/login">Login</Link>
 }
