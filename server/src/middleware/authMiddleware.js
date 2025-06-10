@@ -1,10 +1,18 @@
-import {auth} from "express-oauth2-jwt-bearer";
-import {requiredScopes} from "express-oauth2-jwt-bearer"
+import {expressjwt} from "express-jwt";
+import jwksRsa from "jwks-rsa";
 
-export const checkScopes = requiredScopes('read:messages');
+const domain = process.env.AUTH0_DOMAIN;
+const issuerBaseUrl = `https://${domain}`;
+const audience = process.env.AUTH0_AUDIENCE;
 
-export const checkJwt = auth({
-  audience: process.env.API_IDENTIFIER,
-  issuerBaseURL: process.env.ISSUER_BASE_URL,
-  tokenSigningAlg:process.env.TOKENSIGNINGALG
+export const checkJwt = expressjwt({
+  secret: jwksRsa.expressJwtSecret({
+    cache: true,
+    rateLimit: true,
+    jwksRequestsPerMinute: 5,
+    jwksUri: `${issuerBaseUrl}/.well-known/jwks.json`
+  }),
+  audience: audience,
+  issuer: `${issuerBaseUrl}/`,
+  algorithms: ['RS256']
 });
