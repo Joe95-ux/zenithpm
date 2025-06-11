@@ -3,7 +3,6 @@ import express from "express";
 import cors from "cors";
 const morgan = require('morgan');
 const helmet = require('helmet');
-import { config } from "./config/auth0.js";
 import {checkJwt, checkScopes} from "./middleware/authMiddleware.js";
 import path from "path";
 
