@@ -1,11 +1,14 @@
-dotenv.config();
 import express from "express";
+import dotenv from "dotenv";
 import cors from "cors";
-const morgan = require('morgan');
-const helmet = require('helmet');
-import {checkJwt, checkScopes} from "./middleware/authMiddleware.js";
+import morgan from "morgan";
+import helmet from "helmet";
+import bodyParser from "body-parser";
 import path from "path";
+import { checkJwt } from "./middleware/authMiddleware.ts";
 
+// CONFIGURATIONS
+dotenv.config();
 const app = express();
 const __dirname = path.dirname(__filename);
 const domain = process.env.AUTH0_DOMAIN;
@@ -21,18 +24,21 @@ if (!audience) {
   process.exit(1);
 }
 
-app.use(morgan('dev'));
-app.use(helmet());
-app.use(cors({ origin: baseUrl }));
-app.options("*", cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
+app.use(helmet());
+app.use(helmet.crossOriginResourcePolicy({policy: "cross-origin"}));
+app.use(morgan('common'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended:false}));
+app.use(cors());
+app.options("*", cors());
 
 
 
 // protected api routes ex
 
-app.get('/api/private', checkJwt, checkScopes, function(req, res) {
+app.get('/api/private', checkJwt, function(req, res) {
   res.json({
     message: 'Hello from a private endpoint! You need to be authenticated to see this.'
   });
@@ -41,5 +47,5 @@ app.get('/api/private', checkJwt, checkScopes, function(req, res) {
 const port = process.env.PORT;
 
 app.listen(port, () => {
-  logger.info("Server running on port " + port);
+  console.log("Server running on port " + port);
 });
