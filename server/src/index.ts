@@ -5,7 +5,7 @@ import morgan from "morgan";
 import helmet from "helmet";
 import bodyParser from "body-parser";
 import path from "path";
-import { checkJwt } from "./middleware/authMiddleware.js";
+import { checkJwt } from "./middleware/authMiddleware";
 
 // CONFIGURATIONS
 dotenv.config();
