@@ -10,7 +10,7 @@ const morgan_1 = __importDefault(require("morgan"));
 const helmet_1 = __importDefault(require("helmet"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const path_1 = __importDefault(require("path"));
-const authMiddleware_ts_1 = require("./middleware/authMiddleware.ts");
+const authMiddleware_1 = require("./middleware/authMiddleware");
 // CONFIGURATIONS
 dotenv_1.default.config();
 const app = (0, express_1.default)();
@@ -35,7 +35,7 @@ app.use(body_parser_1.default.urlencoded({ extended: false }));
 app.use((0, cors_1.default)());
 app.options("*", (0, cors_1.default)());
 // protected api routes ex
-app.get('/api/private', authMiddleware_ts_1.checkJwt, function (req, res) {
+app.get('/api/private', authMiddleware_1.checkJwt, function (req, res) {
     res.json({
         message: 'Hello from a private endpoint! You need to be authenticated to see this.'
     });
